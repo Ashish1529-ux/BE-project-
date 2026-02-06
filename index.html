@@ -1,0 +1,1210 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Gateway Sensor Studio</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Syne:wght@500;600;700&family=IBM+Plex+Mono:wght@400;600&family=Plus+Jakarta+Sans:wght@400;600&display=swap");
+
+      :root {
+        --ink: #ecf2ff;
+        --muted: #9aa4b6;
+        --sun: #ffd166;
+        --ocean: #22d3ee;
+        --orchid: #f472b6;
+        --mint: #34d399;
+        --peach: #f59e0b;
+        --cobalt: #60a5fa;
+        --card: rgba(16, 20, 30, 0.92);
+        --glass: rgba(20, 26, 38, 0.82);
+        --shadow: 0 26px 70px rgba(0, 0, 0, 0.45);
+        --page-bg:
+          radial-gradient(900px 520px at 10% 0%, rgba(34, 211, 238, 0.12), transparent 65%),
+          radial-gradient(720px 620px at 90% 10%, rgba(244, 114, 182, 0.12), transparent 70%),
+          radial-gradient(640px 520px at 70% 90%, rgba(52, 211, 153, 0.12), transparent 70%),
+          linear-gradient(150deg, #0a0f1a, #0f172a 45%, #0b1220 80%, #090d16);
+        --panel-border: rgba(148, 163, 184, 0.2);
+        --chip-bg: rgba(15, 23, 42, 0.85);
+        --select-bg: rgba(15, 23, 42, 0.95);
+        --terminal-bg: #0a0f1a;
+      }
+
+      body[data-theme="light"] {
+        --ink: #0b1220;
+        --muted: #4b5563;
+        --sun: #f59e0b;
+        --ocean: #0ea5e9;
+        --orchid: #e879f9;
+        --mint: #22c55e;
+        --peach: #f97316;
+        --cobalt: #2563eb;
+        --card: rgba(255, 255, 255, 0.95);
+        --glass: rgba(255, 255, 255, 0.85);
+        --shadow: 0 24px 60px rgba(15, 23, 42, 0.15);
+        --page-bg:
+          radial-gradient(900px 520px at 10% 0%, rgba(14, 165, 233, 0.14), transparent 65%),
+          radial-gradient(720px 620px at 90% 10%, rgba(168, 85, 247, 0.12), transparent 70%),
+          radial-gradient(640px 520px at 70% 90%, rgba(34, 197, 94, 0.12), transparent 70%),
+          linear-gradient(150deg, #f8fafc, #e2e8f0 55%, #f1f5f9 85%, #ffffff);
+        --panel-border: rgba(15, 23, 42, 0.12);
+        --chip-bg: rgba(241, 245, 249, 0.9);
+        --select-bg: rgba(248, 250, 252, 0.95);
+        --terminal-bg: #0f172a;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: "Plus Jakarta Sans", sans-serif;
+        color: var(--ink);
+        background: var(--page-bg);
+      }
+
+      .page {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 40px 24px 70px;
+        display: grid;
+        gap: 24px;
+      }
+
+      header {
+        display: grid;
+        grid-template-columns: minmax(240px, 1.1fr) minmax(220px, 0.9fr);
+        gap: 24px;
+        align-items: center;
+      }
+
+      .header-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+
+      .theme-toggle {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 14px;
+        border-radius: 999px;
+        background: var(--chip-bg);
+        border: 1px solid var(--panel-border);
+        color: var(--ink);
+        font-weight: 600;
+        font-size: 0.85rem;
+        box-shadow: 0 16px 30px rgba(15, 23, 42, 0.15);
+      }
+
+      .theme-toggle span {
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 0.75rem;
+        letter-spacing: 0.08em;
+      }
+
+      h1 {
+        margin: 0 0 12px;
+        font-family: "Syne", sans-serif;
+        font-size: clamp(2.2rem, 4vw, 3.6rem);
+        letter-spacing: -0.02em;
+      }
+
+      p {
+        margin: 0;
+        color: var(--muted);
+        line-height: 1.6;
+      }
+
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 14px;
+        border-radius: 999px;
+        background: var(--chip-bg);
+        border: 1px solid var(--panel-border);
+        font-weight: 600;
+        box-shadow: var(--shadow);
+        margin-bottom: 14px;
+      }
+
+      .hero-card {
+        background: var(--card);
+        border-radius: 24px;
+        padding: 20px;
+        box-shadow: var(--shadow);
+        border: 1px solid var(--panel-border);
+      }
+
+      .hero-card h2 {
+        margin: 0 0 12px;
+        font-size: 1.2rem;
+      }
+
+      .hero-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .hero-tags span {
+        padding: 6px 12px;
+        border-radius: 999px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        background: var(--chip-bg);
+        border: 1px dashed var(--panel-border);
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: minmax(260px, 0.9fr) minmax(300px, 1fr) minmax(280px, 0.95fr);
+        gap: 24px;
+      }
+
+      .panel {
+        background: var(--card);
+        border-radius: 24px;
+        padding: 22px;
+        box-shadow: var(--shadow);
+        backdrop-filter: blur(10px);
+        border: 1px solid var(--panel-border);
+        transition: transform 0.25s ease, box-shadow 0.25s ease;
+      }
+
+      .panel h3 {
+        margin: 0 0 12px;
+        font-size: 1.1rem;
+        font-family: "Syne", sans-serif;
+      }
+
+      .sensor-list {
+        display: grid;
+        gap: 16px;
+      }
+
+      .sensor-card {
+        background: var(--chip-bg);
+        border-radius: 18px;
+        padding: 14px;
+        border: 2px solid transparent;
+        transition: transform 0.2s ease, border 0.2s ease;
+        position: relative;
+      }
+
+      .sensor-card h4 {
+        margin: 0 0 6px;
+        font-size: 1rem;
+      }
+
+      .sensor-chip {
+        display: inline-flex;
+        padding: 4px 10px;
+        border-radius: 999px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        background: rgba(34, 211, 238, 0.2);
+        color: var(--ink);
+        margin-right: 6px;
+      }
+
+      .sensor-info {
+        font-size: 0.85rem;
+        color: var(--muted);
+      }
+
+      .pin-row {
+        display: flex;
+        gap: 8px;
+        margin-top: 10px;
+        flex-wrap: wrap;
+      }
+
+      .pin-row label {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        background: var(--chip-bg);
+        padding: 6px 10px;
+        border-radius: 999px;
+      }
+
+      .pin-row input {
+        width: 42px;
+        border: none;
+        border-bottom: 2px solid var(--panel-border);
+        background: transparent;
+        font-weight: 600;
+        text-align: center;
+        color: var(--ink);
+      }
+
+      .step-tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 12px;
+        border-radius: 999px;
+        background: var(--chip-bg);
+        border: 1px solid var(--panel-border);
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        font-family: "IBM Plex Mono", monospace;
+      }
+
+      .select-box {
+        margin-top: 14px;
+        display: grid;
+        gap: 10px;
+      }
+
+      .select-box label {
+        font-family: "Syne", sans-serif;
+        font-weight: 600;
+        color: var(--ink);
+        letter-spacing: -0.01em;
+      }
+
+      .selected-overview {
+        display: grid;
+        gap: 10px;
+        margin-top: 10px;
+      }
+
+      .selected-card {
+        padding: 12px;
+        border-radius: 16px;
+        border: 1px solid var(--panel-border);
+        background: var(--chip-bg);
+        display: grid;
+        gap: 6px;
+      }
+
+      .selected-card-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+      }
+
+      .selected-card h4 {
+        margin: 0;
+        font-size: 0.95rem;
+      }
+
+      .selected-meta {
+        font-size: 0.75rem;
+        color: var(--muted);
+        font-family: "IBM Plex Mono", monospace;
+      }
+
+      .selected-pins {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .selected-pins span {
+        padding: 4px 10px;
+        border-radius: 999px;
+        background: var(--select-bg);
+        border: 1px solid var(--panel-border);
+        font-size: 0.7rem;
+        font-weight: 600;
+      }
+
+      .selected-status {
+        padding: 4px 10px;
+        border-radius: 999px;
+        font-size: 0.7rem;
+        font-weight: 700;
+        background: rgba(34, 211, 238, 0.2);
+        color: var(--ink);
+      }
+
+      .selected-status.pending {
+        background: rgba(245, 158, 11, 0.2);
+      }
+
+      .select-shell {
+        position: relative;
+        border-radius: 20px;
+        padding: 14px;
+        background: linear-gradient(135deg, rgba(34, 211, 238, 0.12), rgba(244, 114, 182, 0.12));
+        border: 1px solid var(--panel-border);
+        box-shadow: 0 18px 40px rgba(0, 0, 0, 0.4);
+        overflow: hidden;
+      }
+
+      .select-shell::after {
+        content: "";
+        position: absolute;
+        inset: -40% 10% auto auto;
+        width: 160px;
+        height: 160px;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.75), transparent 70%);
+        opacity: 0.7;
+        pointer-events: none;
+      }
+
+      select.sensor-select {
+        min-height: 56px;
+        border-radius: 16px;
+        border: 2px solid var(--panel-border);
+        padding: 14px 16px;
+        font-weight: 700;
+        font-family: "Syne", sans-serif;
+        background: var(--select-bg);
+        color: var(--ink);
+        box-shadow: inset 0 0 0 1px var(--panel-border);
+        appearance: none;
+        outline: none;
+        position: relative;
+        z-index: 1;
+        background-image: linear-gradient(45deg, transparent 50%, var(--ink) 50%),
+          linear-gradient(135deg, var(--ink) 50%, transparent 50%),
+          linear-gradient(to right, var(--panel-border), var(--panel-border));
+        background-position: calc(100% - 20px) calc(50% - 3px), calc(100% - 14px) calc(50% - 3px), calc(100% - 44px) 50%;
+        background-size: 6px 6px, 6px 6px, 1px 24px;
+        background-repeat: no-repeat;
+      }
+
+      select.sensor-select option {
+        font-family: "IBM Plex Mono", monospace;
+        font-weight: 600;
+        padding: 6px 8px;
+        background: var(--select-bg);
+        color: var(--ink);
+      }
+
+      select.sensor-select:focus {
+        border-color: rgba(34, 211, 238, 0.6);
+        box-shadow:
+          0 0 0 3px rgba(34, 211, 238, 0.2),
+          inset 0 0 0 1px var(--panel-border);
+      }
+
+      .selection-meta {
+        font-size: 0.85rem;
+        color: var(--muted);
+        font-family: "IBM Plex Mono", monospace;
+      }
+
+      .config-list {
+        display: grid;
+        gap: 14px;
+        margin-top: 14px;
+      }
+
+      .config-card {
+        padding: 14px;
+        border-radius: 16px;
+        border: 2px solid var(--panel-border);
+        background: var(--chip-bg);
+      }
+
+      .config-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        margin-bottom: 8px;
+      }
+
+      .config-header h4 {
+        margin: 0;
+        font-size: 0.95rem;
+      }
+
+      .pin-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
+      .pin-grid label {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        background: var(--chip-bg);
+        padding: 6px 10px;
+        border-radius: 999px;
+      }
+
+      .pin-grid input {
+        width: 52px;
+        border: none;
+        border-bottom: 2px solid var(--panel-border);
+        background: transparent;
+        font-weight: 600;
+        text-align: center;
+        color: var(--ink);
+      }
+
+      .mcu-list {
+        display: grid;
+        gap: 16px;
+        margin-top: 14px;
+      }
+
+      .mcu-card {
+        padding: 16px;
+        border-radius: 18px;
+        background: var(--chip-bg);
+        border: 2px dashed var(--panel-border);
+        position: relative;
+      }
+
+      .mcu-card.active {
+        border-color: rgba(34, 211, 238, 0.4);
+        box-shadow: 0 16px 40px rgba(34, 211, 238, 0.2);
+      }
+
+      .mcu-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 10px;
+      }
+
+      .mcu-header h4 {
+        margin: 0;
+        font-size: 1rem;
+      }
+
+      .master-chip {
+        padding: 4px 10px;
+        border-radius: 999px;
+        font-size: 0.7rem;
+        font-weight: 700;
+        background: rgba(96, 165, 250, 0.85);
+        color: white;
+      }
+
+      .assign-select {
+        width: 100%;
+        border-radius: 12px;
+        border: 2px solid var(--panel-border);
+        padding: 8px 12px;
+        font-weight: 600;
+        background: var(--select-bg);
+        color: var(--ink);
+      }
+
+      .terminal {
+        background: var(--terminal-bg);
+        border-radius: 20px;
+        padding: 18px;
+        color: #e4f2ff;
+        font-family: "IBM Plex Mono", monospace;
+        min-height: 280px;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .panel.is-generating {
+        transform: scale(1.02);
+        box-shadow: 0 24px 60px rgba(10, 12, 30, 0.25);
+      }
+
+      .terminal.is-generating {
+        box-shadow: 0 0 0 2px rgba(0, 180, 216, 0.35), 0 18px 40px rgba(0, 0, 0, 0.35);
+      }
+
+      .panel.pulse {
+        animation: pulse-grow 0.6s ease forwards;
+      }
+
+      @keyframes pulse-grow {
+        0% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.015);
+        }
+        100% {
+          transform: scale(1);
+        }
+      }
+
+      .terminal::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(180deg, transparent, rgba(6, 10, 18, 0.85));
+        pointer-events: none;
+      }
+
+      .terminal-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 12px;
+      }
+
+      .terminal-header span {
+        font-size: 0.75rem;
+        color: rgba(228, 242, 255, 0.7);
+      }
+
+      pre {
+        margin: 0;
+        white-space: pre-wrap;
+        word-break: break-word;
+        line-height: 1.6;
+        position: relative;
+        z-index: 1;
+      }
+
+      .controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 14px;
+      }
+
+      button {
+        border: none;
+        padding: 10px 16px;
+        border-radius: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        background: var(--chip-bg);
+        color: var(--ink);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+      }
+
+      button.secondary {
+        background: rgba(34, 211, 238, 0.3);
+        color: var(--ink);
+      }
+
+      button.ghost {
+        background: transparent;
+        border: 2px solid var(--panel-border);
+        color: var(--ink);
+      }
+
+      button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      button:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 24px rgba(10, 11, 18, 0.2);
+      }
+
+      .hint-box {
+        margin-top: 16px;
+        padding: 14px;
+        background: var(--chip-bg);
+        border-radius: 16px;
+        border: 1px dashed var(--panel-border);
+        font-size: 0.85rem;
+        color: var(--muted);
+      }
+
+      .progress {
+        margin-top: 14px;
+        height: 10px;
+        background: var(--panel-border);
+        border-radius: 999px;
+        overflow: hidden;
+      }
+
+      .progress-bar {
+        height: 100%;
+        width: 0%;
+        background: linear-gradient(90deg, var(--orchid), var(--ocean), var(--mint));
+        transition: width 0.3s ease;
+      }
+
+      .status {
+        margin-top: 10px;
+        font-size: 0.85rem;
+        color: var(--muted);
+      }
+
+      @media (max-width: 980px) {
+        header {
+          grid-template-columns: 1fr;
+        }
+
+        .grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+      <header>
+        <div>
+          <div class="header-top">
+            <div class="badge">Gateway Sensor Studio</div>
+            <button id="themeToggle" class="theme-toggle" type="button" aria-pressed="false">
+              <span id="themeLabel">DARK</span>
+              <strong id="themeIcon">MOON</strong>
+            </button>
+          </div>
+          <h1>Select sensors, map pins, and auto-build your gateway JSON.</h1>
+          <p>
+            Choose up to five industrial sensors, set their pins, and assign each to a unique microcontroller.
+            The first microcontroller becomes the master automatically.
+          </p>
+        </div>
+        <div class="hero-card">
+          <h2>Build Rules</h2>
+          <div class="hero-tags">
+            <span>Max 5 sensors</span>
+            <span>One sensor per MCU</span>
+            <span>Auto master MCU</span>
+            <span>Pin mapping required</span>
+          </div>
+          <p style="margin-top: 12px;">
+            Select sensors from the dropdown, enter pins, then assign each to a microcontroller.
+            The JSON preview updates once every MCU has one sensor.
+          </p>
+        </div>
+      </header>
+
+      <section class="grid">
+        <div class="panel">
+          <h3>Sensor Selection</h3>
+          <div class="step-tag">Step 1</div>
+          <div class="select-box">
+            <label for="sensorSelect" class="selection-meta">Choose a sensor and click Add (max 5).</label>
+            <div class="select-shell">
+              <select id="sensorSelect" class="sensor-select">
+                <option value="">Choose a sensor</option>
+                <option value="ultrasonic">Ultrasonic (HC-SR04)</option>
+                <option value="gas">Gas (MQ2)</option>
+                <option value="temperature">Temperature (DHT11)</option>
+                <option value="digital">Digital Proximity</option>
+                <option value="analog">Analog Pressure</option>
+                <option value="vibration">Vibration (Piezo)</option>
+              </select>
+            </div>
+            <div class="controls">
+              <button id="addSensorBtn" class="secondary">Add sensor</button>
+              <button id="removeLastBtn" class="ghost" type="button">Remove last</button>
+            </div>
+            <div class="selection-meta" id="selectionCount">0 of 5 selected.</div>
+            <div class="selected-overview" id="selectedOverview">
+              <div class="selection-meta">Selected sensors will appear here.</div>
+            </div>
+          </div>
+          <div class="hint-box" id="selectionHint">
+            Pick the sensors you want to deploy. The number of microcontrollers will match your selections.
+          </div>
+        </div>
+
+        <div class="panel">
+          <h3>Pin Mapping</h3>
+          <div class="step-tag">Step 2</div>
+          <div class="config-list" id="sensorConfigList">
+            <div class="selection-meta">Select sensors to configure pins.</div>
+          </div>
+
+          <h3 style="margin-top: 24px;">Microcontroller Assignment</h3>
+          <div class="step-tag">Step 3</div>
+          <div class="mcu-list" id="mcuList">
+            <div class="selection-meta">Microcontrollers appear after sensor selection.</div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h3>Console Output</h3>
+          <div class="terminal">
+            <div class="terminal-header">
+              <span>gateway-config.json</span>
+              <span id="statusText">Assign all sensors to generate JSON.</span>
+            </div>
+            <pre id="jsonPreview">Waiting for assignments...</pre>
+          </div>
+          <div class="controls">
+            <button id="downloadBtn" disabled>Download JSON</button>
+            <button class="secondary" id="copyBtn" disabled>Copy JSON</button>
+            <button class="ghost" id="resetBtn">Reset</button>
+          </div>
+          <div class="progress">
+            <div class="progress-bar" id="progressBar"></div>
+          </div>
+          <div class="hint-box" id="hintBox">
+            Hint: Select sensors, set pins, then assign one per microcontroller.
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      const jsonPreview = document.getElementById("jsonPreview");
+      const statusText = document.getElementById("statusText");
+      const downloadBtn = document.getElementById("downloadBtn");
+      const copyBtn = document.getElementById("copyBtn");
+      const resetBtn = document.getElementById("resetBtn");
+      const progressBar = document.getElementById("progressBar");
+      const consolePanel = jsonPreview.closest(".panel");
+      const terminalBox = document.querySelector(".terminal");
+      const selectionHint = document.getElementById("selectionHint");
+      const assignmentHint = document.getElementById("hintBox");
+      const selectionCount = document.getElementById("selectionCount");
+      const sensorSelect = document.getElementById("sensorSelect");
+      const addSensorBtn = document.getElementById("addSensorBtn");
+      const removeLastBtn = document.getElementById("removeLastBtn");
+      const sensorConfigList = document.getElementById("sensorConfigList");
+      const mcuList = document.getElementById("mcuList");
+      const selectedOverview = document.getElementById("selectedOverview");
+      const themeToggle = document.getElementById("themeToggle");
+      const themeLabel = document.getElementById("themeLabel");
+      const themeIcon = document.getElementById("themeIcon");
+
+      const themeStorageKey = "gateway-theme";
+      const mediaPreference = window.matchMedia("(prefers-color-scheme: light)");
+
+      const sensorCatalog = {
+        ultrasonic: {
+          label: "Ultrasonic",
+          deviceKey: "DIST",
+          type: "HC-SR04",
+          pins: { trig: 3, echo: 4 },
+          category: "Digital",
+          note: "Ultrasonic uses trig/echo pins for distance measurement.",
+        },
+        gas: {
+          label: "Gas",
+          deviceKey: "GAS",
+          type: "MQ2",
+          pins: { data: 7 },
+          category: "Analog",
+          note: "MQ2 is analog; you can switch to A0 on some boards.",
+        },
+        temperature: {
+          label: "Temperature",
+          deviceKey: "TEMP",
+          type: "DHT11",
+          pins: { data: 7 },
+          category: "Digital",
+          note: "DHT11 needs a stable digital data pin.",
+        },
+        digital: {
+          label: "Digital Proximity",
+          deviceKey: "PROX",
+          type: "Photoelectric",
+          pins: { data: 8 },
+          category: "Digital",
+          note: "Digital proximity sensors use a single data pin.",
+        },
+        analog: {
+          label: "Analog Pressure",
+          deviceKey: "PRESS",
+          type: "4-20mA",
+          pins: { data: "A0" },
+          category: "Analog",
+          note: "Analog pressure sensors are often read on A0.",
+        },
+        vibration: {
+          label: "Vibration",
+          deviceKey: "VIBE",
+          type: "Piezo",
+          pins: { data: 6 },
+          category: "Digital",
+          note: "Piezo vibration sensors use a digital interrupt pin.",
+        },
+      };
+
+      let selectedSensors = [];
+      let mcuAssignments = [];
+
+      let typingTimer = null;
+      let lastJson = "";
+      let typingActive = false;
+
+      function applyTheme(theme) {
+        document.body.dataset.theme = theme;
+        const isLight = theme === "light";
+        themeToggle.setAttribute("aria-pressed", String(isLight));
+        themeLabel.textContent = isLight ? "LIGHT" : "DARK";
+        themeIcon.textContent = isLight ? "SUN" : "MOON";
+      }
+
+      function getPreferredTheme() {
+        const stored = localStorage.getItem(themeStorageKey);
+        if (stored === "light" || stored === "dark") return stored;
+        return mediaPreference.matches ? "light" : "dark";
+      }
+
+      function toggleTheme() {
+        const next = document.body.dataset.theme === "light" ? "dark" : "light";
+        localStorage.setItem(themeStorageKey, next);
+        applyTheme(next);
+      }
+
+      function normalizePinValue(value) {
+        if (value === "") return 0;
+        if (typeof value === "string" && value.toUpperCase().startsWith("A")) {
+          return value.toUpperCase();
+        }
+        const numberValue = Number(value);
+        return Number.isNaN(numberValue) ? value : numberValue;
+      }
+
+      function renderSensorConfigs() {
+        if (selectedSensors.length === 0) {
+          sensorConfigList.innerHTML = `<div class="selection-meta">Select sensors to configure pins.</div>`;
+          return;
+        }
+
+        sensorConfigList.innerHTML = "";
+        selectedSensors.forEach((sensorKey) => {
+          const meta = sensorCatalog[sensorKey];
+          const card = document.createElement("div");
+          card.className = "config-card";
+          const pinInputs = Object.entries(meta.pins)
+            .map(
+              ([pinKey, pinValue]) =>
+                `<label>${pinKey.toUpperCase()} <input type="text" value="${pinValue}" data-sensor="${sensorKey}" data-pin="${pinKey}" /></label>`
+            )
+            .join("");
+
+          card.innerHTML = `
+            <div class="config-header">
+              <h4>${meta.label} (${meta.type})</h4>
+              <span class="sensor-chip" style="background: var(--mint);">${meta.category}</span>
+            </div>
+            <div class="pin-grid">${pinInputs}</div>
+            <p class="sensor-info">${meta.note}</p>
+          `;
+          sensorConfigList.appendChild(card);
+        });
+      }
+
+      function reconcileAssignments() {
+        const used = new Set();
+        const newAssignments = new Array(selectedSensors.length).fill(null);
+        mcuAssignments.forEach((sensorKey, index) => {
+          if (index >= newAssignments.length) return;
+          if (sensorKey && selectedSensors.includes(sensorKey) && !used.has(sensorKey)) {
+            newAssignments[index] = sensorKey;
+            used.add(sensorKey);
+          }
+        });
+        mcuAssignments = newAssignments;
+      }
+
+      function renderMcuList() {
+        if (selectedSensors.length === 0) {
+          mcuList.innerHTML = `<div class="selection-meta">Microcontrollers appear after sensor selection.</div>`;
+          return;
+        }
+
+        mcuList.innerHTML = "";
+        const assignedSet = new Set(mcuAssignments.filter(Boolean));
+        mcuAssignments.forEach((sensorKey, index) => {
+          const card = document.createElement("div");
+          card.className = `mcu-card${sensorKey ? " active" : ""}`;
+          const isMaster = index === 0;
+          const options = selectedSensors
+            .map((key) => {
+              const meta = sensorCatalog[key];
+              const disabled = assignedSet.has(key) && key !== sensorKey;
+              return `<option value="${key}" ${disabled ? "disabled" : ""}>${meta.label} (${meta.type})</option>`;
+            })
+            .join("");
+
+          card.innerHTML = `
+            <div class="mcu-header">
+              <h4>Microcontroller ${index + 1}</h4>
+              ${isMaster ? `<span class="master-chip">MASTER</span>` : ""}
+            </div>
+            <select class="assign-select" data-index="${index}">
+              <option value="">Assign sensor</option>
+              ${options}
+            </select>
+          `;
+
+          const select = card.querySelector("select");
+          select.value = sensorKey || "";
+          select.addEventListener("change", () => {
+            const chosen = select.value || null;
+            if (chosen) {
+              const conflictIndex = mcuAssignments.findIndex((value) => value === chosen);
+              if (conflictIndex !== -1 && conflictIndex !== index) {
+                mcuAssignments[conflictIndex] = null;
+              }
+            }
+            mcuAssignments[index] = chosen;
+            renderMcuList();
+            renderAssignments();
+            renderSelectedOverview();
+          });
+
+          mcuList.appendChild(card);
+        });
+      }
+
+      function renderSelectedOverview() {
+        if (selectedSensors.length === 0) {
+          selectedOverview.innerHTML = `<div class="selection-meta">Selected sensors will appear here.</div>`;
+          return;
+        }
+
+        selectedOverview.innerHTML = "";
+        selectedSensors.forEach((sensorKey) => {
+          const meta = sensorCatalog[sensorKey];
+          const assignedIndex = mcuAssignments.findIndex((value) => value === sensorKey);
+          const status = assignedIndex === -1 ? "Unassigned" : `MCU ${assignedIndex + 1}`;
+          const pinTags = Object.entries(meta.pins)
+            .map(([pinKey, pinValue]) => `<span>${pinKey.toUpperCase()}: ${pinValue}</span>`)
+            .join("");
+
+          const card = document.createElement("div");
+          card.className = "selected-card";
+          card.innerHTML = `
+            <div class="selected-card-header">
+              <h4>${meta.label} (${meta.type})</h4>
+              <span class="selected-status ${assignedIndex === -1 ? "pending" : ""}">${status}</span>
+            </div>
+            <div class="selected-meta">${meta.category} · ${meta.deviceKey}</div>
+            <div class="selected-pins">${pinTags}</div>
+          `;
+          selectedOverview.appendChild(card);
+        });
+      }
+
+      function renderAssignments() {
+        const assignedCount = mcuAssignments.filter(Boolean).length;
+        const total = selectedSensors.length;
+        progressBar.style.width = total ? `${(assignedCount / total) * 100}%` : "0%";
+
+        if (total === 0) {
+          statusText.textContent = "Select sensors to begin.";
+          downloadBtn.disabled = true;
+          copyBtn.disabled = true;
+          jsonPreview.textContent = "Waiting for assignments...";
+          return;
+        }
+
+        if (assignedCount === total) {
+          statusText.textContent = "All sensors assigned. JSON ready.";
+          downloadBtn.disabled = false;
+          copyBtn.disabled = false;
+          updateJsonPreview(true);
+        } else {
+          statusText.textContent = `Assigned ${assignedCount} of ${total} sensors.`;
+          downloadBtn.disabled = true;
+          copyBtn.disabled = true;
+          jsonPreview.textContent = "Waiting for assignments...";
+        }
+      }
+
+      function buildJson() {
+        const microcontrollers = mcuAssignments.map((sensorKey, index) => {
+          const meta = sensorKey ? sensorCatalog[sensorKey] : null;
+          return {
+            id: `MCU-${index + 1}`,
+            role: index === 0 ? "master" : "node",
+            sensor: meta
+              ? {
+                  key: meta.deviceKey,
+                  type: meta.type,
+                  pins: meta.pins,
+                }
+              : null,
+          };
+        });
+
+        return {
+          selectedSensors: selectedSensors.map((key) => ({
+            key,
+            label: sensorCatalog[key].label,
+            type: sensorCatalog[key].type,
+          })),
+          microcontrollers,
+        };
+      }
+
+      function toggleGenerating(state) {
+        if (!consolePanel || !terminalBox) return;
+        consolePanel.classList.toggle("is-generating", state);
+        terminalBox.classList.toggle("is-generating", state);
+        if (state) {
+          consolePanel.classList.add("pulse");
+          terminalBox.classList.add("pulse");
+          setTimeout(() => {
+            consolePanel.classList.remove("pulse");
+            terminalBox.classList.remove("pulse");
+          }, 600);
+        }
+      }
+
+      function typeText(text) {
+        clearInterval(typingTimer);
+        jsonPreview.textContent = "";
+        let i = 0;
+        typingActive = true;
+        toggleGenerating(true);
+        typingTimer = setInterval(() => {
+          jsonPreview.textContent += text[i];
+          i += 1;
+          if (i >= text.length) {
+            clearInterval(typingTimer);
+            typingActive = false;
+            toggleGenerating(false);
+          }
+        }, 6);
+      }
+
+      function updateJsonPreview(typed) {
+        const payload = buildJson();
+        const formatted = JSON.stringify(payload, null, 2);
+        if (formatted === lastJson) return;
+        lastJson = formatted;
+        if (typed) {
+          typeText(formatted);
+        } else {
+          jsonPreview.textContent = formatted;
+          if (typingActive) {
+            typingActive = false;
+            toggleGenerating(false);
+          }
+        }
+      }
+
+      function updateHint() {
+        if (selectedSensors.length === 0) {
+          const message =
+            "Pick the sensors you want to deploy. The number of microcontrollers will match your selections.";
+          selectionHint.textContent = message;
+          assignmentHint.textContent = "Hint: Select sensors, set pins, then assign one per microcontroller.";
+          return;
+        }
+        const followUp = "Pins set? Assign each sensor to a unique microcontroller. MCU 1 is always master.";
+        selectionHint.textContent = followUp;
+        assignmentHint.textContent = "Assign one sensor per microcontroller. Selected sensors cannot be reused.";
+      }
+
+      function renderSensorSelectOptions() {
+        const available = Object.keys(sensorCatalog).filter((key) => !selectedSensors.includes(key));
+        sensorSelect.innerHTML = `<option value="">Choose a sensor</option>${available
+          .map((key) => `<option value="${key}">${sensorCatalog[key].label} (${sensorCatalog[key].type})</option>`)
+          .join("")}`;
+      }
+
+      function addSelectedSensor() {
+        const value = sensorSelect.value;
+        if (!value) return;
+        if (selectedSensors.includes(value)) return;
+        if (selectedSensors.length >= 5) return;
+        selectedSensors = [...selectedSensors, value];
+        selectionCount.textContent = `${selectedSensors.length} of 5 selected.`;
+        renderSensorSelectOptions();
+        reconcileAssignments();
+        renderSensorConfigs();
+        renderMcuList();
+        renderAssignments();
+        renderSelectedOverview();
+        updateHint();
+      }
+
+      function removeLastSensor() {
+        if (selectedSensors.length === 0) return;
+        selectedSensors = selectedSensors.slice(0, -1);
+        selectionCount.textContent = `${selectedSensors.length} of 5 selected.`;
+        renderSensorSelectOptions();
+        reconcileAssignments();
+        renderSensorConfigs();
+        renderMcuList();
+        renderAssignments();
+        renderSelectedOverview();
+        updateHint();
+      }
+
+      function attachPinHandlers() {
+        sensorConfigList.addEventListener("input", (event) => {
+          const target = event.target;
+          if (!(target instanceof HTMLInputElement)) return;
+          const sensorKey = target.dataset.sensor;
+          const pinKey = target.dataset.pin;
+          if (!sensorKey || !pinKey) return;
+          const value = normalizePinValue(target.value);
+          sensorCatalog[sensorKey].pins[pinKey] = value;
+          if (mcuAssignments.filter(Boolean).length === selectedSensors.length && selectedSensors.length > 0) {
+            updateJsonPreview(false);
+          }
+          renderSelectedOverview();
+        });
+      }
+
+      function downloadJson() {
+        if (!lastJson) return;
+        const blob = new Blob([lastJson], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = "config.json";
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(url);
+      }
+
+      async function copyJson() {
+        if (!lastJson) return;
+        try {
+          await navigator.clipboard.writeText(lastJson);
+          statusText.textContent = "Copied JSON to clipboard.";
+        } catch (err) {
+          statusText.textContent = "Copy failed. Select and copy manually.";
+        }
+      }
+
+      function resetAll() {
+        selectedSensors = [];
+        mcuAssignments = [];
+        selectionCount.textContent = "0 of 5 selected.";
+        renderSensorSelectOptions();
+        renderSensorConfigs();
+        renderMcuList();
+        renderAssignments();
+        renderSelectedOverview();
+        updateHint();
+      }
+
+      attachPinHandlers();
+      renderSensorSelectOptions();
+      renderSensorConfigs();
+      renderMcuList();
+      renderAssignments();
+      renderSelectedOverview();
+      updateHint();
+      applyTheme(getPreferredTheme());
+
+      addSensorBtn.addEventListener("click", addSelectedSensor);
+      removeLastBtn.addEventListener("click", removeLastSensor);
+      downloadBtn.addEventListener("click", downloadJson);
+      copyBtn.addEventListener("click", copyJson);
+      resetBtn.addEventListener("click", resetAll);
+      themeToggle.addEventListener("click", toggleTheme);
+      mediaPreference.addEventListener("change", () => {
+        if (!localStorage.getItem(themeStorageKey)) {
+          applyTheme(getPreferredTheme());
+        }
+      });
+    </script>
+  </body>
+</html>
